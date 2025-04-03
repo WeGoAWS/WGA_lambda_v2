@@ -73,13 +73,13 @@ Resources:
       UserPoolName: !Sub 'wga-user-pool-${Environment}'
       AutoVerifiedAttributes:
         - email
-        - phone_number
+        - phone_number  # phone_number 자동 검증 추가
       MfaConfiguration: OPTIONAL
       UsernameAttributes:
         - email
-      SmsConfiguration:
-        ExternalId: !Sub 'wga-sms-configuration-${Environment}'
-        SnsCallerArn: !GetAtt SNSRole.Arn  # SNS 역할 ARN 필요
+      SmsConfiguration:  # SMS 설정 추가
+        ExternalId: !Sub 'wga-sms-external-${Environment}'
+        SnsCallerArn: !GetAtt SNSRole.Arn
       Policies:
         PasswordPolicy:
           MinimumLength: 8
@@ -96,6 +96,10 @@ Resources:
           AttributeDataType: String
           Mutable: true
           Required: false
+        - Name: phone_number  # phone_number 스키마 추가
+          AttributeDataType: String
+          Mutable: true
+          Required: false  # 필요에 따라 true로 변경 가능
       EmailConfiguration:
         EmailSendingAccount: COGNITO_DEFAULT
       AdminCreateUserConfig:
@@ -158,23 +162,27 @@ Resources:
 
   # IAM Role for Authenticated Users
   SNSRole:
-  Type: AWS::IAM::Role
-  Properties:
-    AssumeRolePolicyDocument:
-      Version: '2012-10-17'
-      Statement:
-        - Effect: Allow
-          Principal:
-            Service: cognito-idp.amazonaws.com
-          Action: sts:AssumeRole
-    Policies:
-      - PolicyName: CognitoSNSPolicy
-        PolicyDocument:
-          Version: '2012-10-17'
-          Statement:
-            - Effect: Allow
-              Action: sns:publish
-              Resource: '*'
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'wga-sns-role-${Environment}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: cognito-idp.amazonaws.com
+            Action: 'sts:AssumeRole'
+      Policies:
+        - PolicyName: !Sub 'wga-sns-policy-${Environment}'
+          PolicyDocument:
+            Version: '2012-10-17'
+            Statement:
+              - Effect: Allow
+                Action: 'sns:publish'
+                Resource: '*'
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
   AuthenticatedUserRole:
     Type: AWS::IAM::Role
     Properties:

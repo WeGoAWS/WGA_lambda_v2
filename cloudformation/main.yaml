@@ -18,31 +18,44 @@ Parameters:
       - "true"
       - "false"
     Description: Enable developer mode (disables zero trust evaluation)
+    
+  # 새로 추가할 파라미터들
+  UserPoolId:
+    Type: String
+    Description: ID of the Cognito User Pool
+    
+  UserPoolClientId:
+    Type: String
+    Description: ID of the Cognito User Pool Client
+    
+  UserPoolDomain:
+    Type: String
+    Description: Domain of the Cognito User Pool
+  
+  IdentityPoolId:
+    Type: String
+    Description: ID of the Cognito Identity Pool
+  
+  OutputBucketName:
+    Type: String
+    Description: Name of the output S3 bucket
+    
+  SecurityAlertsTopicArn:
+    Type: String
+    Description: ARN of the security alerts SNS topic
 
 Resources:
-  # Base Infrastructure Stack
-  BaseStack:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: !Sub 'https://s3.amazonaws.com/wga-cloudformation-${AWS::AccountId}/base.yaml'
-      Parameters:
-        Environment: !Ref Environment
-      Tags:
-        - Key: Environment
-          Value: !Ref Environment
-
   # Auth Service Stack
   AuthStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: BaseStack
     Properties:
       TemplateURL: !Sub 'https://s3.amazonaws.com/wga-cloudformation-${AWS::AccountId}/auth.yaml'
       Parameters:
         Environment: !Ref Environment
-        CognitoUserPoolId: !GetAtt BaseStack.Outputs.UserPoolId
-        CognitoClientId: !GetAtt BaseStack.Outputs.UserPoolClientId
-        CognitoDomain: !GetAtt BaseStack.Outputs.UserPoolDomain
-        CognitoIdentityPoolId: !GetAtt BaseStack.Outputs.IdentityPoolId
+        CognitoUserPoolId: !Ref UserPoolId
+        CognitoClientId: !Ref UserPoolClientId
+        CognitoDomain: !Ref UserPoolDomain
+        CognitoIdentityPoolId: !Ref IdentityPoolId
         DeveloperMode: !Ref DeveloperMode
       Tags:
         - Key: Environment
@@ -51,17 +64,16 @@ Resources:
   # Security Analytics Stack
   SecurityAnalyticsStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: BaseStack
     Properties:
       TemplateURL: !Sub 'https://s3.amazonaws.com/wga-cloudformation-${AWS::AccountId}/security-analytics.yaml'
       Parameters:
         Environment: !Ref Environment
-        CognitoUserPoolId: !GetAtt BaseStack.Outputs.UserPoolId
-        CognitoClientId: !GetAtt BaseStack.Outputs.UserPoolClientId
-        CognitoDomain: !GetAtt BaseStack.Outputs.UserPoolDomain
-        CognitoIdentityPoolId: !GetAtt BaseStack.Outputs.IdentityPoolId
-        OutputBucketName: !GetAtt BaseStack.Outputs.OutputBucketName
-        SecurityAlertsTopicArn: !GetAtt BaseStack.Outputs.SecurityAlertsTopicArn
+        CognitoUserPoolId: !Ref UserPoolId
+        CognitoClientId: !Ref UserPoolClientId
+        CognitoDomain: !Ref UserPoolDomain
+        CognitoIdentityPoolId: !Ref IdentityPoolId
+        OutputBucketName: !Ref OutputBucketName
+        SecurityAlertsTopicArn: !Ref SecurityAlertsTopicArn
       Tags:
         - Key: Environment
           Value: !Ref Environment
@@ -69,33 +81,28 @@ Resources:
   # Zero Trust Stack
   ZeroTrustStack:
     Type: AWS::CloudFormation::Stack
-    DependsOn: BaseStack
     Properties:
       TemplateURL: !Sub 'https://s3.amazonaws.com/wga-cloudformation-${AWS::AccountId}/zero-trust.yaml'
       Parameters:
         Environment: !Ref Environment
-        CognitoUserPoolId: !GetAtt BaseStack.Outputs.UserPoolId
-        CognitoClientId: !GetAtt BaseStack.Outputs.UserPoolClientId
-        CognitoDomain: !GetAtt BaseStack.Outputs.UserPoolDomain
-        CognitoIdentityPoolId: !GetAtt BaseStack.Outputs.IdentityPoolId
-        SecurityAlertsTopicArn: !GetAtt BaseStack.Outputs.SecurityAlertsTopicArn
+        CognitoUserPoolId: !Ref UserPoolId
+        CognitoClientId: !Ref UserPoolClientId
+        CognitoDomain: !Ref UserPoolDomain
+        CognitoIdentityPoolId: !Ref IdentityPoolId
+        SecurityAlertsTopicArn: !Ref SecurityAlertsTopicArn
       Tags:
         - Key: Environment
           Value: !Ref Environment
 
 Outputs:
-  ApiEndpoint:
-    Description: The API Gateway endpoint URL
-    Value: !GetAtt BaseStack.Outputs.ApiGatewayId
-
   CognitoDomain:
     Description: Cognito User Pool Domain
-    Value: !GetAtt BaseStack.Outputs.UserPoolDomain
+    Value: !Ref UserPoolDomain
 
   UserPoolId:
     Description: Cognito User Pool ID
-    Value: !GetAtt BaseStack.Outputs.UserPoolId
+    Value: !Ref UserPoolId
 
   UserPoolClientId:
     Description: Cognito User Pool Client ID
-    Value: !GetAtt BaseStack.Outputs.UserPoolClientId
+    Value: !Ref UserPoolClientId

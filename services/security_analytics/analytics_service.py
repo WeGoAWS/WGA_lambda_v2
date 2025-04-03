@@ -5,14 +5,14 @@ import time
 import datetime
 import uuid
 import numpy as np
-from layers.common.config import CONFIG
-from layers.common.db import (
+from common.config import CONFIG
+from common.db import (
     get_user_activity_profile, 
     update_user_activity_profile, 
     save_anomaly_event, 
     create_analysis_result
 )
-from layers.common.utils import upload_to_s3, publish_to_sns
+from common.utils import upload_to_s3, publish_to_sns
 
 import logging
 logger = logging.getLogger("security-analytics")

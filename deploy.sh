@@ -133,6 +133,14 @@ echo "메인 스택 배포 중: $MAIN_STACK_NAME..."
 
 DEVELOPER_MODE=${2:-true}  # 기본값: true
 
+# 기본 스택에서 출력값 가져오기
+USER_POOL_ID=$(aws cloudformation describe-stacks --stack-name $BASE_STACK_NAME --query "Stacks[0].Outputs[?OutputKey=='UserPoolId'].OutputValue" --output text)
+USER_POOL_CLIENT_ID=$(aws cloudformation describe-stacks --stack-name $BASE_STACK_NAME --query "Stacks[0].Outputs[?OutputKey=='UserPoolClientId'].OutputValue" --output text)
+USER_POOL_DOMAIN=$(aws cloudformation describe-stacks --stack-name $BASE_STACK_NAME --query "Stacks[0].Outputs[?OutputKey=='UserPoolDomain'].OutputValue" --output text)
+IDENTITY_POOL_ID=$(aws cloudformation describe-stacks --stack-name $BASE_STACK_NAME --query "Stacks[0].Outputs[?OutputKey=='IdentityPoolId'].OutputValue" --output text)
+OUTPUT_BUCKET_NAME=$(aws cloudformation describe-stacks --stack-name $BASE_STACK_NAME --query "Stacks[0].Outputs[?OutputKey=='OutputBucketName'].OutputValue" --output text)
+SECURITY_ALERTS_TOPIC_ARN=$(aws cloudformation describe-stacks --stack-name $BASE_STACK_NAME --query "Stacks[0].Outputs[?OutputKey=='SecurityAlertsTopicArn'].OutputValue" --output text)
+
 if aws cloudformation describe-stacks --stack-name $MAIN_STACK_NAME 2>&1 > /dev/null; then
     # 스택이 존재하면 업데이트
     echo "기존 스택 업데이트 중: $MAIN_STACK_NAME"
@@ -142,6 +150,12 @@ if aws cloudformation describe-stacks --stack-name $MAIN_STACK_NAME 2>&1 > /dev/
         --parameters \
             ParameterKey=Environment,ParameterValue=$ENV \
             ParameterKey=DeveloperMode,ParameterValue=$DEVELOPER_MODE \
+            ParameterKey=UserPoolId,ParameterValue=$USER_POOL_ID \
+            ParameterKey=UserPoolClientId,ParameterValue=$USER_POOL_CLIENT_ID \
+            ParameterKey=UserPoolDomain,ParameterValue=$USER_POOL_DOMAIN \
+            ParameterKey=IdentityPoolId,ParameterValue=$IDENTITY_POOL_ID \
+            ParameterKey=OutputBucketName,ParameterValue=$OUTPUT_BUCKET_NAME \
+            ParameterKey=SecurityAlertsTopicArn,ParameterValue=$SECURITY_ALERTS_TOPIC_ARN \
         --capabilities CAPABILITY_NAMED_IAM
 
     # 스택 업데이트 완료 대기
@@ -156,6 +170,12 @@ else
         --parameters \
             ParameterKey=Environment,ParameterValue=$ENV \
             ParameterKey=DeveloperMode,ParameterValue=$DEVELOPER_MODE \
+            ParameterKey=UserPoolId,ParameterValue=$USER_POOL_ID \
+            ParameterKey=UserPoolClientId,ParameterValue=$USER_POOL_CLIENT_ID \
+            ParameterKey=UserPoolDomain,ParameterValue=$USER_POOL_DOMAIN \
+            ParameterKey=IdentityPoolId,ParameterValue=$IDENTITY_POOL_ID \
+            ParameterKey=OutputBucketName,ParameterValue=$OUTPUT_BUCKET_NAME \
+            ParameterKey=SecurityAlertsTopicArn,ParameterValue=$SECURITY_ALERTS_TOPIC_ARN \
         --capabilities CAPABILITY_NAMED_IAM
 
     # 스택 생성 완료 대기
