@@ -35,6 +35,11 @@ Parameters:
     Type: String
     Description: SNS Topic ARN for security alerts
 
+  ApiGatewayId:
+    Type: String
+  ApiGatewayRootResourceId:
+    Type: String
+
 Resources:
   # DynamoDB Tables
   AnalysisResultsTable:
@@ -235,22 +240,22 @@ Resources:
   SecurityAnalyticsApiResource:
     Type: AWS::ApiGateway::Resource
     Properties:
-      RestApiId: !ImportValue wga-${Environment}-ApiGatewayId
-      ParentId: !ImportValue wga-${Environment}-ApiGatewayRootResourceId
+      RestApiId: !Ref ApiGatewayId
+      ParentId: !Ref ApiGatewayRootResourceId
       PathPart: 'security-analytics'
 
   # API Gateway Endpoints
   AnalyzeUserResource:
     Type: AWS::ApiGateway::Resource
     Properties:
-      RestApiId: !ImportValue wga-${Environment}-ApiGatewayId
+      RestApiId: !Ref ApiGatewayId
       ParentId: !Ref SecurityAnalyticsApiResource
       PathPart: 'analyze-user'
 
   AnalyzeUserMethod:
     Type: AWS::ApiGateway::Method
     Properties:
-      RestApiId: !ImportValue wga-${Environment}-ApiGatewayId
+      RestApiId: !Ref ApiGatewayId
       ResourceId: !Ref AnalyzeUserResource
       HttpMethod: GET
       AuthorizationType: NONE
@@ -267,14 +272,14 @@ Resources:
   DetectAnomaliesResource:
     Type: AWS::ApiGateway::Resource
     Properties:
-      RestApiId: !ImportValue wga-${Environment}-ApiGatewayId
+      RestApiId: !Ref ApiGatewayId
       ParentId: !Ref SecurityAnalyticsApiResource
       PathPart: 'detect-anomalies'
 
   DetectAnomaliesMethod:
     Type: AWS::ApiGateway::Method
     Properties:
-      RestApiId: !ImportValue wga-${Environment}-ApiGatewayId
+      RestApiId: !Ref ApiGatewayId
       ResourceId: !Ref DetectAnomaliesResource
       HttpMethod: GET
       AuthorizationType: NONE
@@ -291,14 +296,14 @@ Resources:
   GetRiskScoreResource:
     Type: AWS::ApiGateway::Resource
     Properties:
-      RestApiId: !ImportValue wga-${Environment}-ApiGatewayId
+      RestApiId: !Ref ApiGatewayId
       ParentId: !Ref SecurityAnalyticsApiResource
       PathPart: 'get-risk-score'
 
   GetRiskScoreMethod:
     Type: AWS::ApiGateway::Method
     Properties:
-      RestApiId: !ImportValue wga-${Environment}-ApiGatewayId
+      RestApiId: !Ref ApiGatewayId
       ResourceId: !Ref GetRiskScoreResource
       HttpMethod: GET
       AuthorizationType: NONE
@@ -315,14 +320,14 @@ Resources:
   GetAnomalyEventsResource:
     Type: AWS::ApiGateway::Resource
     Properties:
-      RestApiId: !ImportValue wga-${Environment}-ApiGatewayId
+      RestApiId: !Ref ApiGatewayId
       ParentId: !Ref SecurityAnalyticsApiResource
       PathPart: 'get-anomaly-events'
 
   GetAnomalyEventsMethod:
     Type: AWS::ApiGateway::Method
     Properties:
-      RestApiId: !ImportValue wga-${Environment}-ApiGatewayId
+      RestApiId: !Ref ApiGatewayId
       ResourceId: !Ref GetAnomalyEventsResource
       HttpMethod: GET
       AuthorizationType: NONE
@@ -343,7 +348,7 @@ Resources:
       Action: 'lambda:InvokeFunction'
       FunctionName: !Ref SecurityAnalyticsLambdaFunction
       Principal: 'apigateway.amazonaws.com'
-      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:!ImportValue wga-${Environment}-ApiGatewayId/*'
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayId}/*'
 
 Outputs:
   SecurityAnalyticsLambdaArn:

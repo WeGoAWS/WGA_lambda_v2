@@ -31,6 +31,11 @@ Parameters:
     Type: String
     Description: SNS Topic ARN for security alerts
 
+  ApiGatewayId:
+    Type: String
+  ApiGatewayRootResourceId:
+    Type: String
+
 Resources:
   # DynamoDB Tables
   RoleTemplatesTable:
@@ -193,22 +198,22 @@ Resources:
   ZeroTrustApiResource:
     Type: AWS::ApiGateway::Resource
     Properties:
-      RestApiId: !ImportValue wga-${Environment}-ApiGatewayId
-      ParentId: !ImportValue wga-${Environment}-ApiGatewayRootResourceId
+      RestApiId: !Ref ApiGatewayId
+      ParentId: !Ref ApiGatewayRootResourceId
       PathPart: 'zero-trust'
 
   # Zero Trust API Endpoints
   EvaluateAccessResource:
     Type: AWS::ApiGateway::Resource
     Properties:
-      RestApiId: !ImportValue wga-${Environment}-ApiGatewayId
+      RestApiId: !Ref ApiGatewayId
       ParentId: !Ref ZeroTrustApiResource
       PathPart: 'evaluate-access'
 
   EvaluateAccessMethod:
     Type: AWS::ApiGateway::Method
     Properties:
-      RestApiId: !ImportValue wga-${Environment}-ApiGatewayId
+      RestApiId: !Ref ApiGatewayId
       ResourceId: !Ref EvaluateAccessResource
       HttpMethod: POST
       AuthorizationType: NONE
@@ -226,14 +231,14 @@ Resources:
   GetTemplatesResource:
     Type: AWS::ApiGateway::Resource
     Properties:
-      RestApiId: !ImportValue wga-${Environment}-ApiGatewayId
+      RestApiId: !Ref ApiGatewayId
       ParentId: !Ref ZeroTrustApiResource
       PathPart: 'get-templates'
 
   GetTemplatesMethod:
     Type: AWS::ApiGateway::Method
     Properties:
-      RestApiId: !ImportValue wga-${Environment}-ApiGatewayId
+      RestApiId: !Ref ApiGatewayId
       ResourceId: !Ref GetTemplatesResource
       HttpMethod: GET
       AuthorizationType: NONE
@@ -254,7 +259,7 @@ Resources:
       Action: 'lambda:InvokeFunction'
       FunctionName: !Ref ZeroTrustLambdaFunction
       Principal: 'apigateway.amazonaws.com'
-      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:!ImportValue wga-${Environment}-ApiGatewayId/*'
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayId}/*'
 
   # SSM Parameters for Zero Trust Configuration
   SessionDurationParameter:

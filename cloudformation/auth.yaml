@@ -35,6 +35,11 @@ Parameters:
       - "false"
     Description: Enable developer mode (disables zero trust evaluation)
 
+  ApiGatewayId:
+    Type: String
+  ApiGatewayRootResourceId:
+    Type: String
+
 Resources:
   # DynamoDB Tables
   SessionsTable:
@@ -172,15 +177,15 @@ Resources:
   AuthApiResource:
     Type: AWS::ApiGateway::Resource
     Properties:
-      RestApiId: !Ref ApiGateway
-      ParentId: !GetAtt ApiGateway.RootResourceId
+      RestApiId: !Ref ApiGatewayId
+      ParentId: !Ref ApiGatewayRootResourceId
       PathPart: 'auth'
 
   # Auth API Endpoints
   AuthRootMethod:
     Type: AWS::ApiGateway::Method
     Properties:
-      RestApiId: !Ref ApiGateway
+      RestApiId: !Ref ApiGatewayId
       ResourceId: !Ref AuthApiResource
       HttpMethod: GET
       AuthorizationType: NONE
@@ -196,14 +201,14 @@ Resources:
   AuthLogoutResource:
     Type: AWS::ApiGateway::Resource
     Properties:
-      RestApiId: !Ref ApiGateway
+      RestApiId: !Ref ApiGatewayId
       ParentId: !Ref AuthApiResource
       PathPart: 'logout'
 
   AuthLogoutMethod:
     Type: AWS::ApiGateway::Method
     Properties:
-      RestApiId: !Ref ApiGateway
+      RestApiId: !Ref ApiGatewayId
       ResourceId: !Ref AuthLogoutResource
       HttpMethod: GET
       AuthorizationType: NONE
@@ -219,7 +224,7 @@ Resources:
   AuthLogoutPostMethod:
     Type: AWS::ApiGateway::Method
     Properties:
-      RestApiId: !Ref ApiGateway
+      RestApiId: !Ref ApiGatewayId
       ResourceId: !Ref AuthLogoutResource
       HttpMethod: POST
       AuthorizationType: NONE
@@ -235,14 +240,14 @@ Resources:
   AuthVerifyTokenResource:
     Type: AWS::ApiGateway::Resource
     Properties:
-      RestApiId: !Ref ApiGateway
+      RestApiId: !Ref ApiGatewayId
       ParentId: !Ref AuthApiResource
       PathPart: 'verify-token'
 
   AuthVerifyTokenMethod:
     Type: AWS::ApiGateway::Method
     Properties:
-      RestApiId: !Ref ApiGateway
+      RestApiId: !Ref ApiGatewayId
       ResourceId: !Ref AuthVerifyTokenResource
       HttpMethod: POST
       AuthorizationType: NONE
@@ -259,14 +264,14 @@ Resources:
   AuthSessionResource:
     Type: AWS::ApiGateway::Resource
     Properties:
-      RestApiId: !Ref ApiGateway
+      RestApiId: !Ref ApiGatewayId
       ParentId: !Ref AuthApiResource
       PathPart: 'session'
 
   AuthSessionMethod:
     Type: AWS::ApiGateway::Method
     Properties:
-      RestApiId: !Ref ApiGateway
+      RestApiId: !Ref ApiGatewayId
       ResourceId: !Ref AuthSessionResource
       HttpMethod: GET
       AuthorizationType: NONE
@@ -286,33 +291,7 @@ Resources:
       Action: 'lambda:InvokeFunction'
       FunctionName: !Ref AuthLambdaFunction
       Principal: 'apigateway.amazonaws.com'
-      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*'
-
-  # API Gateway
-  ApiGateway:
-    Type: AWS::ApiGateway::RestApi
-    Properties:
-      Name: !Sub 'wga-auth-api-${Environment}'
-      Description: 'WGA API Gateway'
-      EndpointConfiguration:
-        Types:
-          - REGIONAL
-      Tags:
-        - Key: Environment
-          Value: !Ref Environment
-
-  # API Gateway Deployment
-  ApiDeployment:
-    Type: AWS::ApiGateway::Deployment
-    DependsOn:
-      - AuthRootMethod
-      - AuthLogoutMethod
-      - AuthLogoutPostMethod
-      - AuthVerifyTokenMethod
-      - AuthSessionMethod
-    Properties:
-      RestApiId: !Ref ApiGateway
-      StageName: !Ref Environment
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayId}/*'
 
 Outputs:
   AuthLambdaArn:
@@ -320,12 +299,6 @@ Outputs:
     Value: !GetAtt AuthLambdaFunction.Arn
     Export:
       Name: !Sub '${AWS::StackName}-AuthLambdaArn'
-  
-  ApiGatewayUrl:
-    Description: URL of the API Gateway
-    Value: !Sub 'https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${Environment}'
-    Export:
-      Name: !Sub '${AWS::StackName}-ApiGatewayUrl'
   
   SessionsTableArn:
     Description: ARN of the Sessions DynamoDB table

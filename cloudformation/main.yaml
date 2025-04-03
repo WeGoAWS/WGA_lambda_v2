@@ -57,11 +57,14 @@ Resources:
         CognitoDomain: !Ref UserPoolDomain
         CognitoIdentityPoolId: !Ref IdentityPoolId
         DeveloperMode: !Ref DeveloperMode
+        ApiGatewayId: !ImportValue
+          Fn::Sub: "wga-base-${Environment}-ApiGatewayId"
+        ApiGatewayRootResourceId: !ImportValue
+          Fn::Sub: "wga-base-${Environment}-ApiGatewayRootResourceId"
       Tags:
         - Key: Environment
           Value: !Ref Environment
 
-  # # Security Analytics Stack
   # SecurityAnalyticsStack:
   #   Type: AWS::CloudFormation::Stack
   #   Properties:
@@ -74,11 +77,15 @@ Resources:
   #       CognitoIdentityPoolId: !Ref IdentityPoolId
   #       OutputBucketName: !Ref OutputBucketName
   #       SecurityAlertsTopicArn: !Ref SecurityAlertsTopicArn
+  #       ApiGatewayId: !ImportValue
+  #         Fn::Sub: "wga-base-${Environment}-ApiGatewayId"
+  #       ApiGatewayRootResourceId: !ImportValue
+  #         Fn::Sub: "wga-base-${Environment}-ApiGatewayRootResourceId"
   #     Tags:
   #       - Key: Environment
   #         Value: !Ref Environment
 
-  # # Zero Trust Stack
+  # # # Zero Trust Stack
   # ZeroTrustStack:
   #   Type: AWS::CloudFormation::Stack
   #   Properties:
@@ -90,6 +97,10 @@ Resources:
   #       CognitoDomain: !Ref UserPoolDomain
   #       CognitoIdentityPoolId: !Ref IdentityPoolId
   #       SecurityAlertsTopicArn: !Ref SecurityAlertsTopicArn
+  #       ApiGatewayId: !ImportValue
+  #         Fn::Sub: "wga-base-${Environment}-ApiGatewayId"
+  #       ApiGatewayRootResourceId: !ImportValue
+  #         Fn::Sub: "wga-base-${Environment}-ApiGatewayRootResourceId"
   #     Tags:
   #       - Key: Environment
   #         Value: !Ref Environment
