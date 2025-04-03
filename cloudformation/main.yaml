@@ -1,0 +1,101 @@
+AWSTemplateFormatVersion: '2010-09-09'
+Description: 'WGA - Main CloudFormation Template'
+
+Parameters:
+  Environment:
+    Type: String
+    Default: dev
+    AllowedValues:
+      - dev
+      - test
+      - prod
+    Description: The deployment environment
+
+  DeveloperMode:
+    Type: String
+    Default: "true"
+    AllowedValues:
+      - "true"
+      - "false"
+    Description: Enable developer mode (disables zero trust evaluation)
+
+Resources:
+  # Base Infrastructure Stack
+  BaseStack:
+    Type: AWS::CloudFormation::Stack
+    Properties:
+      TemplateURL: !Sub 'https://s3.amazonaws.com/wga-cloudformation-${AWS::AccountId}/base.yaml'
+      Parameters:
+        Environment: !Ref Environment
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+
+  # Auth Service Stack
+  AuthStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: BaseStack
+    Properties:
+      TemplateURL: !Sub 'https://s3.amazonaws.com/wga-cloudformation-${AWS::AccountId}/auth.yaml'
+      Parameters:
+        Environment: !Ref Environment
+        CognitoUserPoolId: !GetAtt BaseStack.Outputs.UserPoolId
+        CognitoClientId: !GetAtt BaseStack.Outputs.UserPoolClientId
+        CognitoDomain: !GetAtt BaseStack.Outputs.UserPoolDomain
+        CognitoIdentityPoolId: !GetAtt BaseStack.Outputs.IdentityPoolId
+        DeveloperMode: !Ref DeveloperMode
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+
+  # Security Analytics Stack
+  SecurityAnalyticsStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: BaseStack
+    Properties:
+      TemplateURL: !Sub 'https://s3.amazonaws.com/wga-cloudformation-${AWS::AccountId}/security-analytics.yaml'
+      Parameters:
+        Environment: !Ref Environment
+        CognitoUserPoolId: !GetAtt BaseStack.Outputs.UserPoolId
+        CognitoClientId: !GetAtt BaseStack.Outputs.UserPoolClientId
+        CognitoDomain: !GetAtt BaseStack.Outputs.UserPoolDomain
+        CognitoIdentityPoolId: !GetAtt BaseStack.Outputs.IdentityPoolId
+        OutputBucketName: !GetAtt BaseStack.Outputs.OutputBucketName
+        SecurityAlertsTopicArn: !GetAtt BaseStack.Outputs.SecurityAlertsTopicArn
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+
+  # Zero Trust Stack
+  ZeroTrustStack:
+    Type: AWS::CloudFormation::Stack
+    DependsOn: BaseStack
+    Properties:
+      TemplateURL: !Sub 'https://s3.amazonaws.com/wga-cloudformation-${AWS::AccountId}/zero-trust.yaml'
+      Parameters:
+        Environment: !Ref Environment
+        CognitoUserPoolId: !GetAtt BaseStack.Outputs.UserPoolId
+        CognitoClientId: !GetAtt BaseStack.Outputs.UserPoolClientId
+        CognitoDomain: !GetAtt BaseStack.Outputs.UserPoolDomain
+        CognitoIdentityPoolId: !GetAtt BaseStack.Outputs.IdentityPoolId
+        SecurityAlertsTopicArn: !GetAtt BaseStack.Outputs.SecurityAlertsTopicArn
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+
+Outputs:
+  ApiEndpoint:
+    Description: The API Gateway endpoint URL
+    Value: !GetAtt BaseStack.Outputs.ApiGatewayId
+
+  CognitoDomain:
+    Description: Cognito User Pool Domain
+    Value: !GetAtt BaseStack.Outputs.UserPoolDomain
+
+  UserPoolId:
+    Description: Cognito User Pool ID
+    Value: !GetAtt BaseStack.Outputs.UserPoolId
+
+  UserPoolClientId:
+    Description: Cognito User Pool Client ID
+    Value: !GetAtt BaseStack.Outputs.UserPoolClientId
