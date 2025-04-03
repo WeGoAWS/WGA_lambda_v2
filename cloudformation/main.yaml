@@ -61,38 +61,38 @@ Resources:
         - Key: Environment
           Value: !Ref Environment
 
-  # Security Analytics Stack
-  SecurityAnalyticsStack:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: !Sub 'https://s3.amazonaws.com/wga-cloudformation-${AWS::AccountId}/security-analytics.yaml'
-      Parameters:
-        Environment: !Ref Environment
-        CognitoUserPoolId: !Ref UserPoolId
-        CognitoClientId: !Ref UserPoolClientId
-        CognitoDomain: !Ref UserPoolDomain
-        CognitoIdentityPoolId: !Ref IdentityPoolId
-        OutputBucketName: !Ref OutputBucketName
-        SecurityAlertsTopicArn: !Ref SecurityAlertsTopicArn
-      Tags:
-        - Key: Environment
-          Value: !Ref Environment
+  # # Security Analytics Stack
+  # SecurityAnalyticsStack:
+  #   Type: AWS::CloudFormation::Stack
+  #   Properties:
+  #     TemplateURL: !Sub 'https://s3.amazonaws.com/wga-cloudformation-${AWS::AccountId}/security-analytics.yaml'
+  #     Parameters:
+  #       Environment: !Ref Environment
+  #       CognitoUserPoolId: !Ref UserPoolId
+  #       CognitoClientId: !Ref UserPoolClientId
+  #       CognitoDomain: !Ref UserPoolDomain
+  #       CognitoIdentityPoolId: !Ref IdentityPoolId
+  #       OutputBucketName: !Ref OutputBucketName
+  #       SecurityAlertsTopicArn: !Ref SecurityAlertsTopicArn
+  #     Tags:
+  #       - Key: Environment
+  #         Value: !Ref Environment
 
-  # Zero Trust Stack
-  ZeroTrustStack:
-    Type: AWS::CloudFormation::Stack
-    Properties:
-      TemplateURL: !Sub 'https://s3.amazonaws.com/wga-cloudformation-${AWS::AccountId}/zero-trust.yaml'
-      Parameters:
-        Environment: !Ref Environment
-        CognitoUserPoolId: !Ref UserPoolId
-        CognitoClientId: !Ref UserPoolClientId
-        CognitoDomain: !Ref UserPoolDomain
-        CognitoIdentityPoolId: !Ref IdentityPoolId
-        SecurityAlertsTopicArn: !Ref SecurityAlertsTopicArn
-      Tags:
-        - Key: Environment
-          Value: !Ref Environment
+  # # Zero Trust Stack
+  # ZeroTrustStack:
+  #   Type: AWS::CloudFormation::Stack
+  #   Properties:
+  #     TemplateURL: !Sub 'https://s3.amazonaws.com/wga-cloudformation-${AWS::AccountId}/zero-trust.yaml'
+  #     Parameters:
+  #       Environment: !Ref Environment
+  #       CognitoUserPoolId: !Ref UserPoolId
+  #       CognitoClientId: !Ref UserPoolClientId
+  #       CognitoDomain: !Ref UserPoolDomain
+  #       CognitoIdentityPoolId: !Ref IdentityPoolId
+  #       SecurityAlertsTopicArn: !Ref SecurityAlertsTopicArn
+  #     Tags:
+  #       - Key: Environment
+  #         Value: !Ref Environment
 
 Outputs:
   CognitoDomain:

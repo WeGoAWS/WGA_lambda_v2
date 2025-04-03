@@ -193,22 +193,22 @@ Resources:
   ZeroTrustApiResource:
     Type: AWS::ApiGateway::Resource
     Properties:
-      RestApiId: !Ref ApiGateway
-      ParentId: !GetAtt ApiGateway.RootResourceId
+      RestApiId: !ImportValue wga-${Environment}-ApiGatewayId
+      ParentId: !ImportValue wga-${Environment}-ApiGatewayRootResourceId
       PathPart: 'zero-trust'
 
   # Zero Trust API Endpoints
   EvaluateAccessResource:
     Type: AWS::ApiGateway::Resource
     Properties:
-      RestApiId: !Ref ApiGateway
+      RestApiId: !ImportValue wga-${Environment}-ApiGatewayId
       ParentId: !Ref ZeroTrustApiResource
       PathPart: 'evaluate-access'
 
   EvaluateAccessMethod:
     Type: AWS::ApiGateway::Method
     Properties:
-      RestApiId: !Ref ApiGateway
+      RestApiId: !ImportValue wga-${Environment}-ApiGatewayId
       ResourceId: !Ref EvaluateAccessResource
       HttpMethod: POST
       AuthorizationType: NONE
@@ -226,14 +226,14 @@ Resources:
   GetTemplatesResource:
     Type: AWS::ApiGateway::Resource
     Properties:
-      RestApiId: !Ref ApiGateway
+      RestApiId: !ImportValue wga-${Environment}-ApiGatewayId
       ParentId: !Ref ZeroTrustApiResource
       PathPart: 'get-templates'
 
   GetTemplatesMethod:
     Type: AWS::ApiGateway::Method
     Properties:
-      RestApiId: !Ref ApiGateway
+      RestApiId: !ImportValue wga-${Environment}-ApiGatewayId
       ResourceId: !Ref GetTemplatesResource
       HttpMethod: GET
       AuthorizationType: NONE
@@ -254,30 +254,7 @@ Resources:
       Action: 'lambda:InvokeFunction'
       FunctionName: !Ref ZeroTrustLambdaFunction
       Principal: 'apigateway.amazonaws.com'
-      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGateway}/*'
-
-  # API Gateway
-  ApiGateway:
-    Type: AWS::ApiGateway::RestApi
-    Properties:
-      Name: !Sub 'wga-api-${Environment}'
-      Description: 'WGA API Gateway'
-      EndpointConfiguration:
-        Types:
-          - REGIONAL
-      Tags:
-        - Key: Environment
-          Value: !Ref Environment
-
-  # API Gateway Deployment
-  ApiDeployment:
-    Type: AWS::ApiGateway::Deployment
-    DependsOn:
-      - EvaluateAccessMethod
-      - GetTemplatesMethod
-    Properties:
-      RestApiId: !Ref ApiGateway
-      StageName: !Ref Environment
+      SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:!ImportValue wga-${Environment}-ApiGatewayId/*'
 
   # SSM Parameters for Zero Trust Configuration
   SessionDurationParameter:

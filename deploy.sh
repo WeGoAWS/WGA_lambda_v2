@@ -101,31 +101,31 @@ cd ../..
 echo "Auth Lambda 업로드 중..."
 aws s3 cp build/auth/auth-lambda-$ENV.zip "s3://$DEPLOYMENT_BUCKET/auth/auth-lambda-$ENV.zip"
 
-# Security Analytics Lambda 패키징 및 업로드 (존재하는 경우)
-if [ -d "services/security_analytics" ]; then
-    echo "Security Analytics Lambda 패키징 중..."
-    mkdir -p build/security_analytics
-    cp -r services/security_analytics/* build/security_analytics/
-    cd build/security_analytics
-    zip -r security-analytics-lambda-$ENV.zip * > /dev/null
-    cd ../..
+# # Security Analytics Lambda 패키징 및 업로드 (존재하는 경우)
+# if [ -d "services/security_analytics" ]; then
+#     echo "Security Analytics Lambda 패키징 중..."
+#     mkdir -p build/security_analytics
+#     cp -r services/security_analytics/* build/security_analytics/
+#     cd build/security_analytics
+#     zip -r security-analytics-lambda-$ENV.zip * > /dev/null
+#     cd ../..
 
-    echo "Security Analytics Lambda 업로드 중..."
-    aws s3 cp build/security_analytics/security-analytics-lambda-$ENV.zip "s3://$DEPLOYMENT_BUCKET/security_analytics/security-analytics-lambda-$ENV.zip"
-fi
+#     echo "Security Analytics Lambda 업로드 중..."
+#     aws s3 cp build/security_analytics/security-analytics-lambda-$ENV.zip "s3://$DEPLOYMENT_BUCKET/security_analytics/security-analytics-lambda-$ENV.zip"
+# fi
 
-# Zero Trust Lambda 패키징 및 업로드 (존재하는 경우)
-if [ -d "services/zero_trust" ]; then
-    echo "Zero Trust Lambda 패키징 중..."
-    mkdir -p build/zero_trust
-    cp -r services/zero_trust/* build/zero_trust/
-    cd build/zero_trust
-    zip -r zero-trust-lambda-$ENV.zip * > /dev/null
-    cd ../..
+# # Zero Trust Lambda 패키징 및 업로드 (존재하는 경우)
+# if [ -d "services/zero_trust" ]; then
+#     echo "Zero Trust Lambda 패키징 중..."
+#     mkdir -p build/zero_trust
+#     cp -r services/zero_trust/* build/zero_trust/
+#     cd build/zero_trust
+#     zip -r zero-trust-lambda-$ENV.zip * > /dev/null
+#     cd ../..
 
-    echo "Zero Trust Lambda 업로드 중..."
-    aws s3 cp build/zero_trust/zero-trust-lambda-$ENV.zip "s3://$DEPLOYMENT_BUCKET/zero_trust/zero-trust-lambda-$ENV.zip"
-fi
+#     echo "Zero Trust Lambda 업로드 중..."
+#     aws s3 cp build/zero_trust/zero-trust-lambda-$ENV.zip "s3://$DEPLOYMENT_BUCKET/zero_trust/zero-trust-lambda-$ENV.zip"
+# fi
 
 # 메인 스택 배포
 MAIN_STACK_NAME="wga-$ENV"

@@ -292,7 +292,7 @@ Resources:
   ApiGateway:
     Type: AWS::ApiGateway::RestApi
     Properties:
-      Name: !Sub 'wga-api-${Environment}'
+      Name: !Sub 'wga-auth-api-${Environment}'
       Description: 'WGA API Gateway'
       EndpointConfiguration:
         Types:
