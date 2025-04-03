@@ -73,9 +73,13 @@ Resources:
       UserPoolName: !Sub 'wga-user-pool-${Environment}'
       AutoVerifiedAttributes:
         - email
+        - phone_number
       MfaConfiguration: OPTIONAL
       UsernameAttributes:
         - email
+      SmsConfiguration:
+        ExternalId: !Sub 'wga-sms-configuration-${Environment}'
+        SnsCallerArn: !GetAtt SNSRole.Arn  # SNS 역할 ARN 필요
       Policies:
         PasswordPolicy:
           MinimumLength: 8
@@ -153,6 +157,24 @@ Resources:
         unauthenticated: !GetAtt UnauthenticatedUserRole.Arn
 
   # IAM Role for Authenticated Users
+  SNSRole:
+  Type: AWS::IAM::Role
+  Properties:
+    AssumeRolePolicyDocument:
+      Version: '2012-10-17'
+      Statement:
+        - Effect: Allow
+          Principal:
+            Service: cognito-idp.amazonaws.com
+          Action: sts:AssumeRole
+    Policies:
+      - PolicyName: CognitoSNSPolicy
+        PolicyDocument:
+          Version: '2012-10-17'
+          Statement:
+            - Effect: Allow
+              Action: sns:publish
+              Resource: '*'
   AuthenticatedUserRole:
     Type: AWS::IAM::Role
     Properties:
