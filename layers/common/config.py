@@ -83,8 +83,17 @@ def load_config():
         'sns': {
             'anomaly_alert_topic': SNS_ALERT_TOPIC
         },
-        'zero_trust': ZERO_TRUST_CONFIG        
+        'zero_trust': ZERO_TRUST_CONFIG,
+        # 개발자 모드 설정 - 개발 환경에서는 기본적으로 활성화
+        'developer_mode': ENV == 'dev'
     }
+    
+    # 환경 변수로 개발자 모드 설정을 재정의 가능하도록
+    developer_mode_env = os.environ.get('DEVELOPER_MODE', '')
+    if developer_mode_env.lower() in ('true', 'yes', '1'):
+        config['developer_mode'] = True
+    elif developer_mode_env.lower() in ('false', 'no', '0'):
+        config['developer_mode'] = False
     
     # 개발 환경이 아니라면 SSM에서 추가 비밀 설정 로드
     if ENV != 'dev':
