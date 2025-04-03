@@ -7,3 +7,4 @@ simplejson
 botocore
 cryptography
 python-dateutil
+jsonschema
