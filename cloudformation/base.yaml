@@ -152,6 +152,7 @@ Resources:
       CallbackURLs:
         - !Sub 'https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${Environment}/auth/callback'
         - 'http://localhost:5173'
+        - 'http://localhost:5173/redirect'
       LogoutURLs:
         - !Sub 'https://${ApiGateway}.execute-api.${AWS::Region}.amazonaws.com/${Environment}/auth'
         - 'http://localhost:5173'
