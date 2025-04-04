@@ -3,7 +3,8 @@ import json
 import boto3
 import time
 import datetime
-from common.db import create_analysis_result
+import uuid
+from common.db import create_analysis_result, get_anomaly_events_by_user
 from common.utils import (
     extract_session_id_from_cookies, 
     format_api_response, 
@@ -13,7 +14,8 @@ from common.utils import (
     normalize_event,
     create_error_response,
     create_success_response,
-    publish_to_sns
+    publish_to_sns,
+    add_cors_headers
 )
 from analytics_service import (
     analyze_user_behavior, 
@@ -36,6 +38,13 @@ def lambda_handler(event, context):
     # 이벤트 정규화
     normalized_event = normalize_event(event)
     
+    # OPTIONS 메서드 처리 (프리플라이트 요청)
+    if normalized_event.get('httpMethod') == 'OPTIONS':
+        return add_cors_headers({
+            'statusCode': 200,
+            'body': json.dumps({})
+        })
+    
     # 경로 및 HTTP 메서드 추출
     path = normalized_event['path']
     http_method = normalized_event['httpMethod']
@@ -43,24 +52,24 @@ def lambda_handler(event, context):
     try:
         # 엔드포인트 라우팅
         if path.startswith('/security-analytics/analyze-user'):
-            return analyze_user_behavior_handler(normalized_event)
+            return add_cors_headers(analyze_user_behavior_handler(normalized_event))
         elif path.startswith('/security-analytics/detect-anomalies'):
-            return detect_anomalies_handler(normalized_event)
+            return add_cors_headers(detect_anomalies_handler(normalized_event))
         elif path.startswith('/security-analytics/get-risk-score'):
-            return get_risk_score_handler(normalized_event)
+            return add_cors_headers(get_risk_score_handler(normalized_event))
         elif path.startswith('/security-analytics/get-anomaly-events'):
-            return get_anomaly_events_handler(normalized_event)
+            return add_cors_headers(get_anomaly_events_handler(normalized_event))
         else:
-            return format_api_response(404, {'error': 'Not Found'})
+            return add_cors_headers(format_api_response(404, {'error': 'Not Found'}))
     except Exception as e:
-        return handle_api_exception(e)
+        return add_cors_headers(handle_api_exception(e))
 
 def analyze_user_behavior_handler(event):
     """
     사용자 행동 분석 및 프로파일 업데이트 처리
     """
-    query_params = event['queryParameters']
-    id_token = event['id_token']
+    query_params = event.get('queryParameters', {})
+    id_token = event.get('id_token')
     
     # 인증 확인
     if not id_token:
@@ -127,8 +136,8 @@ def detect_anomalies_handler(event):
     """
     계정 전체 이상 행동 탐지 처리
     """
-    query_params = event['queryParameters']
-    id_token = event['id_token']
+    query_params = event.get('queryParameters', {})
+    id_token = event.get('id_token')
     
     # 인증 확인
     if not id_token:
@@ -190,8 +199,8 @@ def get_risk_score_handler(event):
     """
     사용자 위험 점수 조회 처리
     """
-    query_params = event['queryParameters']
-    id_token = event['id_token']
+    query_params = event.get('queryParameters', {})
+    id_token = event.get('id_token')
     
     # 인증 확인
     if not id_token:
@@ -222,8 +231,8 @@ def get_anomaly_events_handler(event):
     """
     사용자의 이상 행동 이벤트 목록 조회 처리
     """
-    query_params = event['queryParameters']
-    id_token = event['id_token']
+    query_params = event.get('queryParameters', {})
+    id_token = event.get('id_token')
     
     # 인증 확인
     if not id_token:
@@ -242,7 +251,6 @@ def get_anomaly_events_handler(event):
     
     # 이상 행동 이벤트 조회
     try:
-        from common.db import get_anomaly_events_by_user
         anomaly_events = get_anomaly_events_by_user(user_arn, limit)
         
         # 응답 구성
@@ -256,6 +264,3 @@ def get_anomaly_events_handler(event):
     except Exception as e:
         logger.error(f"이상 행동 이벤트 조회 중 오류: {e}", exc_info=True)
         return create_error_response(f"이상 행동 이벤트 조회 중 오류가 발생했습니다: {str(e)}", 500)
-
-# 이 모듈에서 사용할 uuid 모듈 임포트 추가
-import uuid

@@ -261,6 +261,60 @@ Resources:
       Tags:
         - Key: Environment
           Value: !Ref Environment
+  
+  # API Gateway에 대한 CORS 설정
+  ApiGatewayCorsSettings:
+    Type: AWS::ApiGateway::GatewayResponse
+    Properties:
+      ResponseParameters:
+        gatewayresponse.header.Access-Control-Allow-Origin: "'http://localhost:5173'"
+        gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        gatewayresponse.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS'"
+        gatewayresponse.header.Access-Control-Allow-Credentials: "'true'"
+      ResponseType: DEFAULT_4XX
+      RestApiId: !Ref ApiGateway
+  
+  # OPTIONS 메서드를 처리하기 위한 공통 Lambda 함수
+  CorsLambdaRole:
+    Type: AWS::IAM::Role
+    Properties:
+      RoleName: !Sub 'wga-cors-lambda-role-${Environment}'
+      AssumeRolePolicyDocument:
+        Version: '2012-10-17'
+        Statement:
+          - Effect: Allow
+            Principal:
+              Service: lambda.amazonaws.com
+            Action: 'sts:AssumeRole'
+      ManagedPolicyArns:
+        - 'arn:aws:iam::aws:policy/service-role/AWSLambdaBasicExecutionRole'
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
+  
+  CorsLambdaFunction:
+    Type: AWS::Lambda::Function
+    Properties:
+      FunctionName: !Sub 'wga-cors-${Environment}'
+      Runtime: python3.9
+      Handler: index.handler
+      Role: !GetAtt CorsLambdaRole.Arn
+      Code:
+        ZipFile: |
+          def handler(event, context):
+              return {
+                  'statusCode': 200,
+                  'headers': {
+                      'Access-Control-Allow-Origin': 'http://localhost:5173',
+                      'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
+                      'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+                      'Access-Control-Allow-Credentials': 'true'
+                  },
+                  'body': '{}'
+              }
+      Tags:
+        - Key: Environment
+          Value: !Ref Environment
 
 Outputs:
   DeploymentBucketName:
@@ -316,3 +370,9 @@ Outputs:
     Value: !GetAtt ApiGateway.RootResourceId
     Export:
       Name: !Sub '${AWS::StackName}-ApiGatewayRootResourceId'
+  
+  CorsLambdaArn:
+    Description: ARN of the CORS Lambda function
+    Value: !GetAtt CorsLambdaFunction.Arn
+    Export:
+      Name: !Sub '${AWS::StackName}-CorsLambdaArn'

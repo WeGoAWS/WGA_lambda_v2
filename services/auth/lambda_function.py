@@ -13,7 +13,8 @@ from common.utils import (
     handle_api_exception,
     normalize_event,
     create_error_response,
-    create_success_response
+    create_success_response,
+    add_cors_headers  # CORS 헤더 추가 함수 가져오기
 )
 from auth_service import (
     verify_cognito_token, 
@@ -36,6 +37,13 @@ def lambda_handler(event, context):
     # 이벤트 정규화
     normalized_event = normalize_event(event)
     
+    # OPTIONS 메서드 처리 (프리플라이트 요청)
+    if normalized_event.get('httpMethod') == 'OPTIONS':
+        return add_cors_headers({
+            'statusCode': 200,
+            'body': json.dumps({})
+        })
+    
     # 경로 및 HTTP 메서드 추출
     path = normalized_event['path']
     http_method = normalized_event['httpMethod']
@@ -43,17 +51,17 @@ def lambda_handler(event, context):
     try:
         # 엔드포인트 라우팅
         if path == '/auth' and http_method == 'GET':
-            return handle_index(normalized_event)
+            return add_cors_headers(handle_index(normalized_event))
         elif path == '/auth/logout' and http_method == 'GET' or path == '/auth/logout' and http_method == 'POST':
-            return handle_logout(normalized_event)
+            return add_cors_headers(handle_logout(normalized_event))
         elif path == '/auth/verify-token' and http_method == 'POST':
-            return handle_verify_token(normalized_event)
+            return add_cors_headers(handle_verify_token(normalized_event))
         elif path == '/auth/session' and http_method == 'GET':
-            return handle_check_session(normalized_event)
+            return add_cors_headers(handle_check_session(normalized_event))
         else:
-            return format_api_response(404, {'error': 'Not Found'})
+            return add_cors_headers(format_api_response(404, {'error': 'Not Found'}))
     except Exception as e:
-        return handle_api_exception(e)
+        return add_cors_headers(handle_api_exception(e))
 
 def handle_index(event):
     """

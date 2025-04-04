@@ -439,3 +439,19 @@ def create_success_response(data=None, message=None):
         response_body["message"] = message
     
     return format_api_response(200, response_body)
+
+def add_cors_headers(response, origin='http://localhost:5173'):
+    """
+    응답 객체에 CORS 헤더를 추가합니다.
+    """
+    if 'headers' not in response:
+        response['headers'] = {}
+        
+    response['headers'].update({
+        'Access-Control-Allow-Origin': origin,
+        'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
+        'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+        'Access-Control-Allow-Credentials': 'true'
+    })
+    
+    return response
