@@ -16,6 +16,7 @@ echo "AWS 리전: $REGION"
 # 배포 버킷 이름
 CLOUDFORMATION_BUCKET="wga-cloudformation-$ACCOUNT_ID"
 DEPLOYMENT_BUCKET="wga-deployment-$ENV"
+OUTPUT_BUCKET_NAME="wga-outputbucket-$ENV"
 
 # 버킷 존재 여부 확인 및 생성
 echo "CloudFormation 템플릿을 저장할 $CLOUDFORMATION_BUCKET 버킷 확인 중..."
@@ -58,6 +59,7 @@ if aws s3 ls "s3://$OUTPUT_BUCKET_NAME" 2>&1 > /dev/null; then
 else
   echo "출력 버킷($OUTPUT_BUCKET_NAME)이 존재하지 않습니다. 새로 생성합니다."
   OUTPUT_BUCKET_EXISTS="false"
+fi  # 이 부분이 누락되었습니다
 
 # 기본 스택 배포
 BASE_STACK_NAME="wga-base-$ENV"
