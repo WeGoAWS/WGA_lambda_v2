@@ -73,12 +73,15 @@ def format_api_response(status_code, body, headers=None):
     Returns:
         dict: API Gateway 응답 객체
     """
+    # 기본 Content-Type 헤더 설정
     default_headers = {
         'Content-Type': 'application/json; charset=utf-8',
-        'Access-Control-Allow-Origin': 'http://localhost:5173',
-        'Access-Control-Allow-Credentials': 'true'
     }
     
+    # CORS 헤더 추가
+    default_headers.update(get_cors_headers())
+    
+    # 사용자 정의 헤더 추가
     if headers:
         default_headers.update(headers)
     
@@ -440,6 +443,23 @@ def create_success_response(data=None, message=None):
     
     return format_api_response(200, response_body)
 
+def get_cors_headers(origin='http://localhost:5173'):
+    """
+    모든 응답에 공통으로 적용할 CORS 헤더를 반환합니다.
+    
+    Args:
+        origin (str): 허용할 오리진
+        
+    Returns:
+        dict: CORS 헤더 딕셔너리
+    """
+    return {
+        'Access-Control-Allow-Origin': origin,
+        'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
+        'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
+        'Access-Control-Allow-Credentials': 'true'
+    }
+
 def add_cors_headers(response, origin='http://localhost:5173'):
     """
     응답 객체에 CORS 헤더를 추가합니다.
@@ -447,11 +467,6 @@ def add_cors_headers(response, origin='http://localhost:5173'):
     if 'headers' not in response:
         response['headers'] = {}
         
-    response['headers'].update({
-        'Access-Control-Allow-Origin': origin,
-        'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
-        'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
-        'Access-Control-Allow-Credentials': 'true'
-    })
+    response['headers'].update(get_cors_headers(origin))
     
     return response

@@ -40,6 +40,28 @@ ZERO_TRUST_CONFIG = {
     'continuous_auth_interval': int(os.environ.get('CONTINUOUS_AUTH_INTERVAL', '900'))
 }
 
+# CORS 설정
+CORS_SETTINGS = {
+    'dev': {
+        'allowed_origins': ['http://localhost:5173'],
+        'allowed_methods': ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        'allowed_headers': ['Content-Type', 'X-Amz-Date', 'Authorization', 'X-Api-Key', 'X-Amz-Security-Token'],
+        'allow_credentials': True
+    },
+    'test': {
+        'allowed_origins': ['https://test-app.example.com'],
+        'allowed_methods': ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        'allowed_headers': ['Content-Type', 'X-Amz-Date', 'Authorization', 'X-Api-Key', 'X-Amz-Security-Token'],
+        'allow_credentials': True
+    },
+    'prod': {
+        'allowed_origins': ['https://app.example.com'],
+        'allowed_methods': ['GET', 'POST', 'PUT', 'DELETE', 'OPTIONS'],
+        'allowed_headers': ['Content-Type', 'X-Amz-Date', 'Authorization', 'X-Api-Key', 'X-Amz-Security-Token'],
+        'allow_credentials': True
+    }
+}
+
 # AWS SSM에서 비밀 설정 가져오기
 def get_ssm_parameter(param_name, with_decryption=True):
     """
@@ -85,7 +107,9 @@ def load_config():
         },
         'zero_trust': ZERO_TRUST_CONFIG,
         # 개발자 모드 설정 - 개발 환경에서는 기본적으로 활성화
-        'developer_mode': ENV == 'dev'
+        'developer_mode': ENV == 'dev',
+        # CORS 설정 추가
+        'cors': CORS_SETTINGS.get(ENV, CORS_SETTINGS['dev'])
     }
     
     # 환경 변수로 개발자 모드 설정을 재정의 가능하도록

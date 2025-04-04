@@ -15,7 +15,7 @@ from common.utils import (
     create_error_response,
     create_success_response,
     publish_to_sns,
-    add_cors_headers
+
 )
 from analytics_service import (
     analyze_user_behavior, 
@@ -40,29 +40,22 @@ def lambda_handler(event, context):
     
     # OPTIONS 메서드 처리 (프리플라이트 요청)
     if normalized_event.get('httpMethod') == 'OPTIONS':
-        return add_cors_headers({
-            'statusCode': 200,
-            'body': json.dumps({})
-        })
-    
-    # 경로 및 HTTP 메서드 추출
-    path = normalized_event['path']
-    http_method = normalized_event['httpMethod']
+        return format_api_response(200, {})
     
     try:
         # 엔드포인트 라우팅
         if path.startswith('/security-analytics/analyze-user'):
-            return add_cors_headers(analyze_user_behavior_handler(normalized_event))
+            return analyze_user_behavior_handler(normalized_event)
         elif path.startswith('/security-analytics/detect-anomalies'):
-            return add_cors_headers(detect_anomalies_handler(normalized_event))
+            return detect_anomalies_handler(normalized_event)
         elif path.startswith('/security-analytics/get-risk-score'):
-            return add_cors_headers(get_risk_score_handler(normalized_event))
+            return get_risk_score_handler(normalized_event)
         elif path.startswith('/security-analytics/get-anomaly-events'):
-            return add_cors_headers(get_anomaly_events_handler(normalized_event))
+            return get_anomaly_events_handler(normalized_event)
         else:
-            return add_cors_headers(format_api_response(404, {'error': 'Not Found'}))
+            return format_api_response(404, {'error': 'Not Found'})
     except Exception as e:
-        return add_cors_headers(handle_api_exception(e))
+        return handle_api_exception(e)
 
 def analyze_user_behavior_handler(event):
     """

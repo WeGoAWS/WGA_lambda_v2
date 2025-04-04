@@ -274,6 +274,18 @@ Resources:
       ResponseType: DEFAULT_4XX
       RestApiId: !Ref ApiGateway
   
+  # 5XX 오류에 대한 CORS 설정도 추가
+  ApiGatewayCorsSettings5XX:
+    Type: AWS::ApiGateway::GatewayResponse
+    Properties:
+      ResponseParameters:
+        gatewayresponse.header.Access-Control-Allow-Origin: "'http://localhost:5173'"
+        gatewayresponse.header.Access-Control-Allow-Headers: "'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token'"
+        gatewayresponse.header.Access-Control-Allow-Methods: "'GET,POST,PUT,DELETE,OPTIONS'"
+        gatewayresponse.header.Access-Control-Allow-Credentials: "'true'"
+      ResponseType: DEFAULT_5XX
+      RestApiId: !Ref ApiGateway
+  
   # OPTIONS 메서드를 처리하기 위한 공통 Lambda 함수
   CorsLambdaRole:
     Type: AWS::IAM::Role
@@ -299,13 +311,23 @@ Resources:
       Runtime: python3.9
       Handler: index.handler
       Role: !GetAtt CorsLambdaRole.Arn
+      Environment:
+        Variables:
+          ENV: !Ref Environment
+          ALLOWED_ORIGINS: !If [IsProd, "'https://app.example.com'", !If [IsTest, "'https://test-app.example.com'", "'http://localhost:5173'"]]
       Code:
         ZipFile: |
+          import os
+          import json
+          
           def handler(event, context):
+              env = os.environ.get('ENV', 'dev')
+              allowed_origins = os.environ.get('ALLOWED_ORIGINS', 'http://localhost:5173')
+              
               return {
                   'statusCode': 200,
                   'headers': {
-                      'Access-Control-Allow-Origin': 'http://localhost:5173',
+                      'Access-Control-Allow-Origin': allowed_origins,
                       'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
                       'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
                       'Access-Control-Allow-Credentials': 'true'
