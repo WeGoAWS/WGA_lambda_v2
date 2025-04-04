@@ -114,10 +114,11 @@ mkdir -p build
 # Common 레이어 패키징 및 업로드
 echo "Common 레이어 패키징 중..."
 mkdir -p build/layers/python/common
+mkdir -p build/layers/python/lib/python3.12/site-packages
 cp -r layers/common/* build/layers/python/common/
 
 echo "Common 레이어 의존성 설치 중..."
-pip install -r layers/common/requirements.txt -t build/layers/python/common/
+pip install -r layers/common/requirements.txt -t build/layers/python/lib/python3.12/site-packages/
 
 cd build/layers
 echo "Common 레이어 압축 중..."

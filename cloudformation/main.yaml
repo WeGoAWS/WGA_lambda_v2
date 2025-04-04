@@ -129,7 +129,7 @@ Resources:
     Properties:
       Handler: index.handler
       Role: !GetAtt DeploymentFunctionRole.Arn
-      Runtime: python3.9
+      Runtime: python3.12
       Code:
         ZipFile: |
           import boto3

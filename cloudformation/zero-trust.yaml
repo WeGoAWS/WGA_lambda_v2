@@ -152,7 +152,7 @@ Resources:
     Type: AWS::Lambda::Function
     Properties:
       FunctionName: !Sub 'wga-zero-trust-enforcer-${Environment}'
-      Runtime: python3.9
+      Runtime: python3.12
       Handler: lambda_function.lambda_handler
       Code:
         S3Bucket: !Sub 'wga-deployment-${Environment}'
@@ -191,7 +191,7 @@ Resources:
         S3Bucket: !Sub 'wga-deployment-${Environment}'
         S3Key: !Sub 'layers/common-layer-${Environment}.zip'
       CompatibleRuntimes:
-        - python3.9
+        - python3.12
       LicenseInfo: MIT
 
   # API Gateway Resources

@@ -12,6 +12,11 @@ ENV = os.environ.get('ENV', 'dev')
 SESSIONS_TABLE = os.environ.get('SESSIONS_TABLE', f'Sessions-{ENV}')
 USERS_TABLE = os.environ.get('USERS_TABLE', f'Users-{ENV}')
 ANALYSIS_RESULTS_TABLE = os.environ.get('ANALYSIS_RESULTS_TABLE', f'AnalysisResults-{ENV}')
+USER_BEHAVIOR_PROFILES_TABLE = os.environ.get('USER_BEHAVIOR_PROFILES_TABLE', f'UserBehaviorProfiles-{ENV}')
+ROLE_TEMPLATES_TABLE = os.environ.get('ROLE_TEMPLATES_TABLE', f'RoleTemplates-{ENV}')
+ROLE_HISTORY_TABLE = os.environ.get('ROLE_HISTORY_TABLE', f'RoleHistory-{ENV}')
+ANOMALY_EVENTS_TABLE = os.environ.get('ANOMALY_EVENTS_TABLE', f'AnomalyEvents-{ENV}')
+ACCESS_DECISIONS_TABLE = os.environ.get('ACCESS_DECISIONS_TABLE', f'AccessDecisions-{ENV}')
 
 # S3 버킷
 OUTPUT_BUCKET = os.environ.get('OUTPUT_BUCKET', 'wga-outputbucket')
@@ -21,13 +26,6 @@ USER_POOL_ID = os.environ.get('USER_POOL_ID', '')
 COGNITO_CLIENT_ID = os.environ.get('COGNITO_CLIENT_ID', '')
 COGNITO_DOMAIN = os.environ.get('COGNITO_DOMAIN', '')
 COGNITO_IDENTITY_POOL_ID = os.environ.get('COGNITO_IDENTITY_POOL_ID', '')
-
-# 추가 DynamoDB 테이블
-USER_BEHAVIOR_PROFILES_TABLE = os.environ.get('USER_BEHAVIOR_PROFILES_TABLE', f'UserBehaviorProfiles-{ENV}')
-ROLE_TEMPLATES_TABLE = os.environ.get('ROLE_TEMPLATES_TABLE', f'RoleTemplates-{ENV}')
-ROLE_HISTORY_TABLE = os.environ.get('ROLE_HISTORY_TABLE', f'RoleHistory-{ENV}')
-ANOMALY_EVENTS_TABLE = os.environ.get('ANOMALY_EVENTS_TABLE', f'AnomalyEvents-{ENV}')
-ACCESS_DECISIONS_TABLE = os.environ.get('ACCESS_DECISIONS_TABLE', f'AccessDecisions-{ENV}')
 
 # SNS 주제
 SNS_ALERT_TOPIC = os.environ.get('SNS_ALERT_TOPIC', f'wga-security-alerts-{ENV}')

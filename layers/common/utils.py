@@ -443,30 +443,22 @@ def create_success_response(data=None, message=None):
     
     return format_api_response(200, response_body)
 
-def get_cors_headers(origin='http://localhost:5173'):
+def get_cors_headers():
     """
-    모든 응답에 공통으로 적용할 CORS 헤더를 반환합니다.
-    
-    Args:
-        origin (str): 허용할 오리진
-        
+    CONFIG에서 CORS 설정을 기반으로 헤더를 반환합니다.
+
     Returns:
         dict: CORS 헤더 딕셔너리
     """
+    cors = CONFIG.get("cors", {})
+    origin = cors.get("allowed_origins", ["http://localhost:5173"])[0]
+    methods = ",".join(cors.get("allowed_methods", ["GET", "POST", "PUT", "DELETE", "OPTIONS"]))
+    headers = ",".join(cors.get("allowed_headers", ["Content-Type", "Authorization"]))
+    allow_credentials = cors.get("allow_credentials", True)
+
     return {
         'Access-Control-Allow-Origin': origin,
-        'Access-Control-Allow-Headers': 'Content-Type,X-Amz-Date,Authorization,X-Api-Key,X-Amz-Security-Token',
-        'Access-Control-Allow-Methods': 'GET,POST,PUT,DELETE,OPTIONS',
-        'Access-Control-Allow-Credentials': 'true'
+        'Access-Control-Allow-Headers': headers,
+        'Access-Control-Allow-Methods': methods,
+        'Access-Control-Allow-Credentials': str(allow_credentials).lower()
     }
-
-def add_cors_headers(response, origin='http://localhost:5173'):
-    """
-    응답 객체에 CORS 헤더를 추가합니다.
-    """
-    if 'headers' not in response:
-        response['headers'] = {}
-        
-    response['headers'].update(get_cors_headers(origin))
-    
-    return response
