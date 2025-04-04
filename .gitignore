@@ -59,6 +59,7 @@ htmlcov/
 .coverage.*
 .cache
 nosetests.xml
+python
 
 # 배포 관련 임시 파일
 node_modules/
