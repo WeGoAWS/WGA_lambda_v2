@@ -20,6 +20,9 @@ Parameters:
 
 Conditions:
   ShouldCreateBucket: !Equals [!Ref BucketExists, "false"]
+  IsProd: !Equals [!Ref Environment, "prod"]
+  IsTest: !Equals [!Ref Environment, "test"]
+  IsDev: !Equals [!Ref Environment, "dev"]
 
 Resources:
   # S3 Buckets
