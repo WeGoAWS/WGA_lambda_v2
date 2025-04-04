@@ -292,6 +292,21 @@ Resources:
       FunctionName: !Ref AuthLambdaFunction
       Principal: 'apigateway.amazonaws.com'
       SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayId}/*'
+  
+  AuthApiOptionsMethod:
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayId
+      ResourceId: !Ref AuthApiResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 
+          - 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CorsLambdaArn}/invocations'
+          - CorsLambdaArn: !ImportValue 
+              Fn::Sub: "wga-base-${Environment}-CorsLambdaArn"
 
 Outputs:
   AuthLambdaArn:
