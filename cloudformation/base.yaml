@@ -17,9 +17,17 @@ Parameters:
     AllowedValues:
       - "true"
       - "false"
+  
+  OutputBucketExists:
+    Type: String
+    Default: "false"
+    AllowedValues:
+      - "true"
+      - "false"
 
 Conditions:
   ShouldCreateBucket: !Equals [!Ref BucketExists, "false"]
+  ShouldCreateOutputBucket: !Equals [!Ref OutputBucketExists, "false"]
   IsProd: !Equals [!Ref Environment, "prod"]
   IsTest: !Equals [!Ref Environment, "test"]
   IsDev: !Equals [!Ref Environment, "dev"]
@@ -44,6 +52,7 @@ Resources:
 
   OutputBucket:
     Type: AWS::S3::Bucket
+    Condition: ShouldCreateOutputBucket
     DeletionPolicy: Retain
     Properties:
       BucketName: !Sub 'wga-outputbucket-${Environment}'
@@ -361,7 +370,7 @@ Outputs:
   
   OutputBucketName:
     Description: Name of the S3 bucket for output files
-    Value: !Ref OutputBucket
+    Value: !If [ShouldCreateOutputBucket, !Ref OutputBucket, !Sub 'wga-outputbucket-${Environment}']
     Export:
       Name: !Sub '${AWS::StackName}-OutputBucketName'
   

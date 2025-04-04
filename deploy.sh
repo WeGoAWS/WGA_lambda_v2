@@ -51,6 +51,14 @@ else
   BUCKET_EXISTS="false"
 fi
 
+# OutputBucket 존재 여부 확인
+if aws s3 ls "s3://$OUTPUT_BUCKET_NAME" 2>&1 > /dev/null; then
+  echo "출력 버킷($OUTPUT_BUCKET_NAME)이 이미 존재합니다. 이 버킷을 재사용합니다."
+  OUTPUT_BUCKET_EXISTS="true"
+else
+  echo "출력 버킷($OUTPUT_BUCKET_NAME)이 존재하지 않습니다. 새로 생성합니다."
+  OUTPUT_BUCKET_EXISTS="false"
+
 # 기본 스택 배포
 BASE_STACK_NAME="wga-base-$ENV"
 echo "기본 인프라 스택 배포 중: $BASE_STACK_NAME..."
@@ -63,6 +71,7 @@ if aws cloudformation describe-stacks --stack-name $BASE_STACK_NAME 2>&1 > /dev/
         --template-url "https://s3.amazonaws.com/$CLOUDFORMATION_BUCKET/base.yaml" \
         --parameters ParameterKey=Environment,ParameterValue=$ENV \
                     ParameterKey=BucketExists,ParameterValue=$BUCKET_EXISTS \
+                    ParameterKey=OutputBucketExists,ParameterValue=$OUTPUT_BUCKET_EXISTS \
         --capabilities CAPABILITY_NAMED_IAM
 
     # 스택 업데이트 완료 대기
@@ -76,6 +85,7 @@ else
         --template-url "https://s3.amazonaws.com/$CLOUDFORMATION_BUCKET/base.yaml" \
         --parameters ParameterKey=Environment,ParameterValue=$ENV \
                     ParameterKey=BucketExists,ParameterValue=$BUCKET_EXISTS \
+                    ParameterKey=OutputBucketExists,ParameterValue=$OUTPUT_BUCKET_EXISTS \
         --capabilities CAPABILITY_NAMED_IAM
 
     # 스택 생성 완료 대기
