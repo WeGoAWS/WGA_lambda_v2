@@ -57,11 +57,17 @@ Resources:
     Properties:
       BucketName: !Sub 'wga-outputbucket-${Environment}'
       VersioningConfiguration:
-        Status: Enabled
-      BucketEncryption:
-        ServerSideEncryptionConfiguration:
-          - ServerSideEncryptionByDefault:
-              SSEAlgorithm: AES256
+        !If 
+          - ShouldCreateOutputBucket
+          - Status: Enabled
+          - !Ref "AWS::NoValue"
+      BucketEncryption: 
+        !If 
+          - ShouldCreateOutputBucket
+          - ServerSideEncryptionConfiguration:
+              - ServerSideEncryptionByDefault:
+                  SSEAlgorithm: AES256
+          - !Ref "AWS::NoValue"
       CorsConfiguration:
         CorsRules:
           - AllowedHeaders:
@@ -235,8 +241,14 @@ Resources:
                   - 's3:PutObject'
                   - 's3:ListBucket'
                 Resource:
-                  - !GetAtt OutputBucket.Arn
-                  - !Sub '${OutputBucket.Arn}/*'
+                  !If
+                    - ShouldCreateOutputBucket
+                    - 
+                      - !GetAtt OutputBucket.Arn
+                      - !Sub '${OutputBucket.Arn}/*'
+                    - 
+                      - !Sub 'arn:aws:s3:::wga-outputbucket-${Environment}'
+                      - !Sub 'arn:aws:s3:::wga-outputbucket-${Environment}/*'
       Tags:
         - Key: Environment
           Value: !Ref Environment
@@ -267,7 +279,10 @@ Resources:
                 Action:
                   - 's3:GetObject'
                 Resource:
-                  - !Sub '${OutputBucket.Arn}/public/*'
+                  - !If 
+                      - ShouldCreateOutputBucket
+                      - !Sub '${OutputBucket.Arn}/public/*'
+                      - !Sub 'arn:aws:s3:::wga-outputbucket-${Environment}/public/*'
       Tags:
         - Key: Environment
           Value: !Ref Environment
