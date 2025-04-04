@@ -262,19 +262,19 @@ Resources:
       SourceArn: !Sub 'arn:aws:execute-api:${AWS::Region}:${AWS::AccountId}:${ApiGatewayId}/*'
 
   ZeroTrustApiOptionsMethod:
-  Type: AWS::ApiGateway::Method
-  Properties:
-    RestApiId: !Ref ApiGatewayId
-    ResourceId: !Ref ZeroTrustApiResource
-    HttpMethod: OPTIONS
-    AuthorizationType: NONE
-    Integration:
-      Type: AWS_PROXY
-      IntegrationHttpMethod: POST
-      Uri: !Sub 
-        - 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CorsLambdaArn}/invocations'
-        - CorsLambdaArn: !ImportValue 
-            Fn::Sub: "wga-base-${Environment}-CorsLambdaArn"
+    Type: AWS::ApiGateway::Method
+    Properties:
+      RestApiId: !Ref ApiGatewayId
+      ResourceId: !Ref ZeroTrustApiResource
+      HttpMethod: OPTIONS
+      AuthorizationType: NONE
+      Integration:
+        Type: AWS_PROXY
+        IntegrationHttpMethod: POST
+        Uri: !Sub 
+          - 'arn:aws:apigateway:${AWS::Region}:lambda:path/2015-03-31/functions/${CorsLambdaArn}/invocations'
+          - CorsLambdaArn: !ImportValue 
+              Fn::Sub: "wga-base-${Environment}-CorsLambdaArn"
 
   # SSM Parameters for Zero Trust Configuration
   SessionDurationParameter:
