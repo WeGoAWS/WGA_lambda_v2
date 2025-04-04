@@ -355,7 +355,7 @@ Resources:
 Outputs:
   DeploymentBucketName:
     Description: Name of the S3 bucket for deployment packages
-    Value: !Ref DeploymentBucket
+    Value: !If [ShouldCreateBucket, !Ref DeploymentBucket, !Sub 'wga-deployment-${Environment}']
     Export:
       Name: !Sub '${AWS::StackName}-DeploymentBucketName'
   
