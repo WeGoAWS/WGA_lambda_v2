@@ -10,11 +10,22 @@ Parameters:
       - test
       - prod
     Description: The deployment environment
+  
+  BucketExists:
+    Type: String
+    Default: "false"
+    AllowedValues:
+      - "true"
+      - "false"
+
+Conditions:
+  ShouldCreateBucket: !Equals [!Ref BucketExists, "false"]
 
 Resources:
   # S3 Buckets
   DeploymentBucket:
     Type: AWS::S3::Bucket
+    Condition: ShouldCreateBucket
     DeletionPolicy: Retain
     Properties:
       BucketName: !Sub 'wga-deployment-${Environment}'
