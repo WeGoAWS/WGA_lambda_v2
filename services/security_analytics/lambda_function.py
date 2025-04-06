@@ -52,6 +52,8 @@ def lambda_handler(event, context):
             return get_risk_score_handler(normalized_event)
         elif path.startswith('/security-analytics/get-anomaly-events'):
             return get_anomaly_events_handler(normalized_event)
+        elif path.startswith('/security-analytics/test'):
+            return test(normalized_event)
         else:
             return format_api_response(404, {'error': 'Not Found'})
     except Exception as e:
@@ -257,3 +259,28 @@ def get_anomaly_events_handler(event):
     except Exception as e:
         logger.error(f"이상 행동 이벤트 조회 중 오류: {e}", exc_info=True)
         return create_error_response(f"이상 행동 이벤트 조회 중 오류가 발생했습니다: {str(e)}", 500)
+
+def test(event):
+    # id_token 검증 안함
+    
+    response_data = {
+        "user_arn": "arn:aws:iam::123456789012:user/dev_user",
+        "request_summary": "사용자가 S3 버킷을 생성하기 위한 권한 요청",
+        "request_policy": {
+            "Version": "2012-10-17",
+            "Statement": [
+                {
+                    "Effect": "Allow",
+                    "Action": [
+                        "s3:CreateBucket",
+                        "s3:PutBucketPolicy",
+                        "s3:PutBucketAcl",
+                        "s3:PutEncryptionConfiguration",
+                        "s3:PutBucketTagging"
+                    ],
+                    "Resource": "arn:aws:s3:::*"
+                }
+            ]
+        }
+    }
+    return create_success_response(response_data)
