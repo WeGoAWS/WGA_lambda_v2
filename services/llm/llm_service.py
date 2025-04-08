@@ -1,4 +1,5 @@
 # 프롬프트 slack to llm1
+import json
 
 def build_llm1_prompt(user_input):
     return [
@@ -22,7 +23,7 @@ Context information:
         - sourceIPAddress (VARCHAR)
         - awsRegion (VARCHAR)
         - errorCode (VARCHAR)
-    - Table: sehub
+    - Table: sechub
         - id (INT)
         - created_at (TIMESTAMP)
         - user_id (VARCHAR)
@@ -41,3 +42,30 @@ User Question:
 '''
         }
     ]
+
+def build_llm2_prompt(user_input, query_result):
+    return [
+        {
+            "role": "system",
+            "content": "You are an assistant that provides clear and accurate natural language explanations based on database query results."
+        },
+        {
+            "role": "user",
+            "content": f'''
+Task:
+Generate a human-readable answer based on the original user question and the SQL query result.
+
+Original User Question:
+{user_input}
+
+SQL Query Result (as JSON):
+{json.dumps(query_result, indent=2)}
+
+Instructions:
+- Be specific using the data.
+- Use concise, professional language.
+- Do not ask user for clarification.
+'''
+        }
+    ]
+
